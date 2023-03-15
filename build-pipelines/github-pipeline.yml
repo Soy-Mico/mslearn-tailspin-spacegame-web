@@ -9,10 +9,10 @@ trigger:
 
 
 stages:
-- stage: 'Build Stage'
+- stage: 'BuildStage'
   displayName: 'Build the application'
   jobs:
-  - job: 'Build Job'
+  - job: 'BuildJob'
     displayName: 'Build Job'
     pool:
       vmImage: 'ubuntu-22.04'
