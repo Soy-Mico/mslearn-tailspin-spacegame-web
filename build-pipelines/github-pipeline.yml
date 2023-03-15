@@ -6,54 +6,64 @@ trigger:
     exclude:
     - docs/*  # exclude the docs folder
 
-pool:
-  vmImage: 'ubuntu-22.04'
 
-variables:
-  buildConfiguration: 'Release'
-  workingDirectory: '$(System.DefaultWorkingDirectory)/src'
-  wwwrootDir: '$(workingDirectory)/Tailspin.SpaceGame.Web/wwwroot'
-  dotnetSdkVersion: '6.x'
 
-steps:
-- task: UseDotNet@2
-  displayName: 'Use .NET SDK $(dotnetSdkVersion)'
-  inputs:
-    packageType: sdk
-    version: '$(dotnetSdkVersion)'
+stages:
+- stage: 'Build Stage'
+  displayName: 'Build the application'
+  jobs:
+  - job: 'Build Job'
+    displayName: 'Build Job'
+    pool:
+      vmImage: 'ubuntu-22.04'
+      demands:
+      - npm
 
-- task: Npm@1
-  displayName: 'Run npm install'
-  inputs:
-    workingDir: '$(workingDirectory)'
-    verbose: false
+    variables:
+      buildConfiguration: 'Release'
+      workingDirectory: '$(System.DefaultWorkingDirectory)/src'
+      wwwrootDir: '$(workingDirectory)/Tailspin.SpaceGame.Web/wwwroot'
+      dotnetSdkVersion: '6.x'
 
-- script: '$(workingDirectory)/node_modules/.bin/node-sass $(wwwrootDir) --output $(wwwrootDir)'
-  displayName: 'Compile Sass assets'
+    steps:
+    - task: UseDotNet@2
+      displayName: 'Use .NET SDK $(dotnetSdkVersion)'
+      inputs:
+        packageType: sdk
+        version: '$(dotnetSdkVersion)'
 
-- task: gulp@1
-  displayName: 'Run gulp tasks'
-  inputs:
-    gulpFile: '$(workingDirectory)/gulpfile.js'
+    - task: Npm@1
+      displayName: 'Run npm install'
+      inputs:
+        workingDir: '$(workingDirectory)'
+        verbose: false
 
-- script: 'echo "$(Build.DefinitionName), $(Build.BuildId), $(Build.BuildNumber)" > buildinfo.txt'
-  displayName: 'Write build info as .txt file'
-  workingDirectory: $(wwwrootDir)
+    - script: '$(workingDirectory)/node_modules/.bin/node-sass $(wwwrootDir) --output $(wwwrootDir)'
+      displayName: 'Compile Sass assets'
 
-- task: DotNetCoreCLI@2
-  displayName: 'Restore project dependencies'
-  inputs:
-    command: 'restore'
-    projects: '**/*.csproj'
+    - task: gulp@1
+      displayName: 'Run gulp tasks'
+      inputs:
+        gulpFile: '$(workingDirectory)/gulpfile.js'
 
-- template: templates/dotnet-build-template.yml
-  parameters:
-    buildConfiguration: 'Release'
+    - script: 'echo "$(Build.DefinitionName), $(Build.BuildId), $(Build.BuildNumber)" > buildinfo.txt'
+      displayName: 'Write build info as .txt file'
+      workingDirectory: $(wwwrootDir)
 
-- template: templates/dotnet-build-template.yml
-  parameters:
-    buildConfiguration: 'Debug'
+    - task: DotNetCoreCLI@2
+      displayName: 'Restore project dependencies'
+      inputs:
+        command: 'restore'
+        projects: '**/*.csproj'
 
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact - $(buildConfiguration): drop'
-  condition: succeeded()    
+    - template: templates/dotnet-build-template.yml
+      parameters:
+        buildConfiguration: 'Release'
+
+    - template: templates/dotnet-build-template.yml
+      parameters:
+        buildConfiguration: 'Debug'
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact - $(buildConfiguration): drop'
+      condition: succeeded()    
