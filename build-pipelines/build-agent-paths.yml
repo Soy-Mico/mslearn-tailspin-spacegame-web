@@ -1,0 +1,25 @@
+trigger:
+  branches:
+    include:
+    - '*'     # build all branches
+  paths:
+    exclude:
+    - docs/*  # exclude the docs folder
+
+pool:
+  vmImage: 'ubuntu-22.04'
+
+steps:
+- script: |
+  echo "\$(Build.DefinitionName): $(Build.DefinitionName)" > build-agent-paths.txt
+  echo "\$(Build.BuildId): $(Build.BuildId)" >> build-agent-paths.txt
+  echo "\$(Build.BuildNumber): $(Build.BuildNumber)" >> build-agent-paths.txt
+
+
+  echo "\$(Pipeline.Workspace): $(Pipeline.Workspace)" >> build-agent-paths.txt
+  echo "\$(System.DefaultWorkingDirectory): $(System.DefaultWorkingDirectory)" >> build-agent-paths.txt
+
+
+  displayName: 'Write build info as .txt file'
+  workingDirectory: $(wwwrootDir)
+
