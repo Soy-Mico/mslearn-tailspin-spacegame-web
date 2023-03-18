@@ -9,6 +9,10 @@ trigger:
 pool:
   vmImage: 'ubuntu-22.04'
 
+variables:
+  buildConfiguration: 'Release'
+  workingDirectory: '$(System.DefaultWorkingDirectory)/src'
+  
 steps:
 - script: |
     echo "\$(Build.DefinitionName): $(Build.DefinitionName)" > build-agent-paths.txt
@@ -21,5 +25,5 @@ steps:
 
 
   displayName: 'Write variables info to build-agent-paths.txt file'
-  workingDirectory: $(wwwrootDir)
+  workingDirectory: $(workingDirectory)
 
