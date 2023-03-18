@@ -15,7 +15,7 @@ variables:
   
 steps:
 - script: |
-    echo "\$(Build.DefinitionName): $(Build.DefinitionName)" > build-agent-paths.txt
+    echo '$(Build.DefinitionName): ' $(Build.DefinitionName)' > build-agent-paths.txt
     echo "\$(Build.BuildId): $(Build.BuildId)" >> build-agent-paths.txt
     echo "\$(Build.BuildNumber): $(Build.BuildNumber)" >> build-agent-paths.txt
     echo "\$(Pipeline.Workspace): $(Pipeline.Workspace)" >> build-agent-paths.txt
