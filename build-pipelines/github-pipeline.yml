@@ -6,6 +6,9 @@ trigger:
     exclude:
     - docs/*  # exclude the docs folder
 
+variables:
+  buildConfiguration: 'Release'
+
 stages:
 - stage: 'Build'
   displayName: 'Build the application'
@@ -18,7 +21,6 @@ stages:
       - npm
 
     variables:
-      buildConfiguration: 'Release'
       workingDirectory: '$(System.DefaultWorkingDirectory)/src'
       wwwrootDir: '$(workingDirectory)/Tailspin.SpaceGame.Web/wwwroot'
       dotnetSdkVersion: '6.x'
