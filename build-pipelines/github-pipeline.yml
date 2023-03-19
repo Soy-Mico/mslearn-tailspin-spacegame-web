@@ -87,7 +87,7 @@ stages:
             artifact: drop
 
           - script: |
-            echo "[buildConfiguration]: $(buildConfiguration)" > build-agent-paths.txt
+              echo "[buildConfiguration]: $(buildConfiguration)" > build-agent-paths.txt
 
           - task: AzureWebApp@1
             displayName: 'Azure App Service Deploy: website'
