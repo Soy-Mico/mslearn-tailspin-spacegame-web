@@ -8,9 +8,10 @@ trigger:
 
 variables:
   buildConfiguration: 'Release'
+  releaseBranchName: main
 
 stages:
-- stage: 'Build'
+- stage: 'Build-App'
   displayName: 'Build the application'
   jobs:
   - job: 'Build'
@@ -69,9 +70,14 @@ stages:
       displayName: 'Publish Artifact - $(buildConfiguration): drop'
       condition: succeeded()    
 
-- stage: 'Deploy'
-  displayName: 'Deploy the web application'
+- stage: 'Dev-Deployment'
+  displayName: 'Deploy Web App to Dev Environment'
   dependsOn: Build
+  condition: |
+    and(
+      succeeded(),
+      eq( variables['Build.SourceBranchName'], variables['releaseBranchName'])
+    )
   jobs:
   - deployment: Deploy
     pool:
@@ -99,3 +105,4 @@ stages:
               azureSubscription: 'Tailspin-Automatic Service Principal'
               appName: '$(webAppName-dev)'
               package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'      
+- stage:  
