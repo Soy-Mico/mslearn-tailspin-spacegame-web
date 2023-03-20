@@ -11,11 +11,11 @@ variables:
   releaseBranchName: main
 
 stages:
-- stage: 'Build-App'
-  displayName: 'Build the application'
+- stage: 'BuildAppStage'
+  displayName: 'Build Application Stage'
   jobs:
-  - job: 'Build'
-    displayName: 'Build Job'
+  - job: 'BuildAppJob'
+    displayName: 'Build App Job'
     pool:
       vmImage: 'ubuntu-22.04'
       demands:
@@ -70,9 +70,9 @@ stages:
       displayName: 'Publish Artifact - $(buildConfiguration): drop'
       condition: succeeded()    
 
-- stage: 'Dev-Deployment'
+- stage: 'DevDeploymentStage'
   displayName: 'Deploy Web App to Dev Environment'
-  dependsOn: Build
+  dependsOn: BuildAppStage
   condition: |
     and(
       succeeded(),
@@ -105,4 +105,4 @@ stages:
               azureSubscription: 'Tailspin-Automatic Service Principal'
               appName: '$(webAppName-dev)'
               package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'      
-- stage:  
+  
