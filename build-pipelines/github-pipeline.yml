@@ -10,6 +10,14 @@ variables:
   buildConfiguration: 'Release'
   releaseBranchName: main
 
+schedules:
+- cron: '0 3 * * *'  
+  displayName: 'Deploy every day at 3 A.M.'
+  branches:
+    include:
+    - main
+  always: false
+
 stages:
 - stage: 'BuildAppStage'
   displayName: 'Build Application Stage'
@@ -99,10 +107,37 @@ stages:
               echo "[buildConfiguration]: $(buildConfiguration)" > build-agent-paths.txt
 
           - task: AzureWebApp@1
-            displayName: 'Azure App Service Deploy: website'
+            displayName: 'Azure App Service Deploy: Dev WebSite'
             inputs:
               #Service Connection:
               azureSubscription: 'Tailspin-Automatic Service Principal'
               appName: '$(webAppName-dev)'
               package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'      
-  
+
+- stage: 'TestDeploymentStage'  
+  displayName: 'Deploy Web App to Test Environment'
+  dependsOn: DevDeploymentStage
+  #condition: eq( variables['Build.Reason'], 'Schedule')
+  jobs:
+  - job: 'TestDeploymentJob'
+    displayName: 'Test Environment Deployment Job'
+    deployment: Deploy
+    environment: Testing
+    pool:
+      vmImage: 'ubuntu-20.04'
+    variables:
+    - group: Release
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: current
+            artifact: drop
+          - task: AzureWebApp@1
+            displayName: 'Azure App Service Deploy: Tests WebSite'  
+            inputs:
+              #Service Connection:
+              azureSubscription: 'Tailspin-Automatic Service Principal'
+              appName: '$(webAppName-test)'
+              package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
+
