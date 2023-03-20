@@ -1,5 +1,6 @@
 parameters:
   buildConfiguration: 'Release'
+  workingDirectory: ''
 
 steps:
 - task: DotNetCoreCLI@2
@@ -24,22 +25,27 @@ steps:
 #Tool to install: ReportGenerator
 - task: DotNetCoreCLI@2
   displayName: 'Install .NET tools from local manifest'
+  condition: and(succeeded(), eq('${{ parameters.buildConfiguration }}', 'Release'))
   inputs:
     command: custom
     custom: tool
-    arguments: 'restore'
+    arguments: 'restore --tool-manifest ./.config/dotnet-tools.json'
+    workingDirectory: ${{ parameters.workingDirectory}}
 
 #Generate code coberture report
 - task: DotNetCoreCLI@2
   displayName: 'Create code coverage report'
+  condition: and(succeeded(), eq('${{ parameters.buildConfiguration }}', 'Release'))
   inputs:
     command: custom
     custom: tool
     arguments: 'run reportgenerator -reports:$(Build.SourcesDirectory)/**/coverage.cobertura.xml -targetdir:$(Build.SourcesDirectory)/CodeCoverage -reporttypes:HtmlInline_AzurePipelines'
+    workingDirectory: ${{ parameters.workingDirectory}}
 
 #Publish  code coberture report
 - task: PublishCodeCoverageResults@1
   displayName: 'Publish code coverage report'
+  condition: and(succeeded(), eq('${{ parameters.buildConfiguration }}', 'Release'))
   inputs:
     codeCoverageTool: 'cobertura'
     summaryFileLocation: '$(Build.SourcesDirectory)/**/coverage.cobertura.xml'    
@@ -48,7 +54,9 @@ steps:
   displayName: 'Publish the project - ${{ parameters.buildConfiguration }}'
   inputs:
     command: 'publish'
-    projects: '**/*.csproj'
+    projects: |
+      **/*.csproj
+      !**/*Tests.csproj
     publishWebProjects: false
     arguments: '--no-build --configuration ${{ parameters.buildConfiguration }} --output $(Build.ArtifactStagingDirectory)/${{ parameters.buildConfiguration }}'
     zipAfterPublish: true
