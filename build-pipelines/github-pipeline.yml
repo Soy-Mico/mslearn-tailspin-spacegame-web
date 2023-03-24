@@ -140,3 +140,28 @@ stages:
               appName: '$(webAppName-test)'
               package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
 
+- stage: 'StagingDeploymentStage'  
+  displayName: 'Deploy Web App to Staging Environment'
+  dependsOn: TestDeploymentStage
+  jobs:
+  - deployment: StagingEnvironmentDeploy
+    displayName: 'Staging Environment Deployment Job'    
+    environment: Staging
+    pool:
+      vmImage: 'ubuntu-20.04'
+    variables:
+    - group: Release
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: current
+            artifact: drop
+          - task: AzureWebApp@1
+            displayName: 'Azure App Service Deploy: Tests WebSite'  
+            inputs:
+              #Service Connection:
+              azureSubscription: 'Tailspin-Automatic Service Principal'
+              appName: '$(webAppName-staging)'
+              package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'              
+
