@@ -1,0 +1,6 @@
+<ModulePaths>
+  <Exclude>
+   <ModulePath>NUnit.Framework.dll</ModulePath>
+   <ModulePath>NUnit3.TestAdapter.dll</ModulePath>
+  </Exclude>
+</ModulePaths>
