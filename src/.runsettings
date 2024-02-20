@@ -1,0 +1,5 @@
+<ModulePaths>
+  <Exclude>
+   <ModulePath>nunit3.testadapter.dll</ModulePath>
+  </Exclude>
+</ModulePaths>
